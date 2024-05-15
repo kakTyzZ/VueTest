@@ -1,35 +1,29 @@
 <script setup>
-import {ref,onMounted, watch,computed} from "vue"
+import {onMounted} from "vue"
 import {useMovieStore} from "../../store/MovieStore.js"
 import debounce from "lodash.debounce"
 import MovieCard from './MovieCard.vue' 
-
 
 const movieStore = useMovieStore();
 
 
 function onMovieCardClick(target){
-    
-    movieStore.chosenMovie = target
-    router.push('/detailed')
-}
+    movieStore.navBarInputState = target.name
+    movieStore.searchMovies()
+  }
 
-
+onMounted(()=>{
+    if(localStorage.getItem('favMovies')){
+        movieStore.favMovies = JSON.parse(localStorage.getItem('favMovies'))
+        console.log('favMovies', movieStore.favMovies);
+    }
+})
 
 onMounted(async ()=>{
     await movieStore.getRelatedWithoutQueryBuilderMovies()
 })
 
-watch(() => movieStore.navBarInputState, debounce(() => {
 
-    
-movieStore.searchMovies()
-
-
-},3000));
-/* setTimeout(() => {
-    movieStore.searchMovies()
-  }, 3000); */
 </script>
 
 <template>
@@ -40,16 +34,17 @@ movieStore.searchMovies()
                 <button class="px-7 py-2 bg-blue-900 text-white rounded-lg">Смотреть все</button>
             </div>
         </div>
-
-        <div v-if="movieStore.movies" class="grid grid-cols-2 gap-5 my-5 sm:grid-cols-3 lg:grid-cols-5">
-            <MovieCard  @click="onMovieCardClick(item)"  v-for="item in movieStore.movies" :name="item.name" :poster="item.poster" :rating="item.rating" :key="item"/>
+        <div v-if="movieStore.movies" >
+            <div v-show="movieStore.loading" class="text-3xl flex justify-center" >Загрузка...</div>
+            <div  class="grid grid-cols-2 gap-5 my-5 sm:grid-cols-3 lg:grid-cols-5 z-10">
+                 <MovieCard  @click="onMovieCardClick(item)"  v-for="item in movieStore.movies" :name="item.name" :poster="item.poster" :rating="item.rating" :key="item"/> 
+            </div>
         </div>
-        
-        
-
-        
         <div>
-            <button class="flex justify-center items-center mx-auto  px-14 py-2 bg-blue-900 text-white rounded-lg">Показать еще</button>
+            <button
+            v-show="movieStore.stepOfTheMovies !== 100"
+            @click="movieStore.addMoreMoviesButton"
+            class="flex justify-center items-center mx-auto  px-14 py-2 bg-blue-900 text-white rounded-lg">Показать еще</button>
         </div>
     </div>
     

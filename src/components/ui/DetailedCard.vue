@@ -1,11 +1,27 @@
 <script setup>
-
+import { onMounted } from "vue";
 import PlaySvg from "./svg/PlaySvg.vue"
 import RatingSvg from "./svg/RatingSvg.vue"
 import Arrow from "./svg/Arrow.vue"
 import { useMovieStore } from "@/store/MovieStore";
+import BookMarkSvg from "./svg/BookMarkSvg.vue";
 
 const movieStore = useMovieStore()
+
+const addToFavMovies = ()=>{
+    if(!movieStore.favMovies.includes(movieStore.chosenMovie)){
+        movieStore.favMovies.push(movieStore.chosenMovie) 
+        
+    }else{
+        movieStore.favMovies = movieStore.favMovies.filter(item => item !== movieStore.chosenMovie)
+        }
+    
+    addToLocalStorage()
+}
+
+const addToLocalStorage = ()=>{
+    localStorage.setItem('favMovies', JSON.stringify(movieStore.favMovies))
+}
 
 
 
@@ -13,56 +29,73 @@ const movieStore = useMovieStore()
 
 <template>
     <div>
-        
-
-        <main class="m-5">
-            <div class="flex items-center gap-4">
-                <a><Arrow color="black"  /></a>
+        <div v-if="movieStore.loading === true" class="text-3xl">Loading</div>
+        <div v-else>
+                <main class="m-5">
+            <div >
+                <router-link to="/" class="flex items-center gap-4">
+                    <a><Arrow color="black"  /></a>
                 <div>Назад</div>
+                </router-link>
             </div>
 
             <div class="flex relative my-5">
                 <div class="relative ">
-                    <div class=" flex items-center p-1 gap-1 bg-blue-600 max-w-[50px] w-full absolute h-[30px] rounded-xl left-3 top-3 z-10 ">
-                         <RatingSvg color="white"  width="max-w-[15px]" />
-                         <div class="text-sm text-white">7.9</div>
+                    <div class=" flex items-center p-1 gap-1 bg-blue-600 max-w-[55px] w-full absolute h-[30px] rounded-xl left-3 top-3 z-10 ">
+                         <RatingSvg color="white"  width="max-w-[17px]" />
+                         <div  class="text-sm text-white ml-5">{{ movieStore.chosenMovie.rating }}</div>
                     </div>
-                   
-                    <div class="w-[300px]"><img src="/spider.webp" alt=""></div>
+                    <div  class="w-[300px] border-2 h-[95%]">
+                        <img v-if="(typeof movieStore.chosenMovie.poster === 'string')" :src="movieStore.chosenMovie.poster" alt="">
+                        <img v-else src="" alt="" class="w-full bg-slate-100 h-full">
+                    </div>
+                    
                 </div>
 
                 <div class="ml-7">
-                    <div class="text-2xl mb-3"> <strong>{{ movieStore.name }}</strong> </div>
-                    <div class="opacity-50 mb-3">{{ movieStore.name }}</div>
+                    <div class="text-2xl mb-3"> <strong>{{ movieStore.chosenMovie.name }}</strong> </div>
+                    <div class="opacity-50 mb-3">{{ movieStore.chosenMovie.name }}</div>
                     <div class="gap-3 flex ">
                         <button class="relative rounded-2xl py-1 px-7 bg-blue-800 text-white">
                             Смотреть
                             <PlaySvg color="white" top="top-[10px]" left="left-3"/>
                         </button>
-                        <button class="relative rounded-2xl py-1 px-7 bg-gray-300 ">
+                        <div>
+                            <button v-if="!movieStore.favMovies.includes(movieStore.chosenMovie)" @click="addToFavMovies" class="relative rounded-2xl py-1 px-7 bg-gray-300 ">
                             Буду смотреть
-                            <PlaySvg color="black" top="top-[10px]" left="left-3"/>
+                            <BookMarkSvg color="black" top="top-[8px]" left="left-3"/>
                         </button>
-
+                            <button v-else @click="addToFavMovies" class="relative rounded-2xl py-1 px-7 bg-blue-300 ">
+                            Убрать из избранного
+                            <BookMarkSvg color="black" top="top-[8px]" left="left-3"/>
+                        </button>
+                        </div>
+                        
                     </div>
-
                     <div>
                         <div class="mt-6"><strong>О фильме</strong></div>
-                        <div class="mt-3 flex gap-[50px] lg:gap-[100px] text-sm">
-                           <div class="flex flex-col gap-3">
-                            <div>Страна</div>
-                            <div>Жанр</div>
-                            <div>Слоган</div>
-                            <div>Возраст</div>
-                            <div>Бюджет</div>
-                           </div>
-                           <div class="flex flex-col gap-3">
-                            <div>США</div>
-                            <div>драма,криминал,детектив,боевик</div>
-                            <div>Unmask The Truth</div>
-                            <div>16+</div>
-                            <div>$300.000.000</div>
-                           </div>
+                        <div class="mt-3 flex flex-col gap-[10px] lg:gap-[30px] text-sm">
+                          <div class="text-xl flex  ">
+                            <div class="w-[150px]"> <strong>Страна</strong></div>
+                            <div class="" v-for="country in movieStore.chosenMovie.countries" :key="country">{{ country }}</div>
+                          </div>
+                          <div class="text-xl flex ">
+                            <div class="w-[150px]"> <strong>Жанры</strong></div>
+                            <div class="flex" v-for="genre in movieStore.chosenMovie.genres" :key="genre">
+                                
+                                    {{ genre }}
+                                   
+                            </div>
+                          </div>
+                          <div class="text-xl flex ">
+                            <div class="w-[150px]"> <strong>Год</strong></div>
+                            <div >{{ movieStore.chosenMovie.year }}</div>
+                          </div>
+                          <div class="text-xl flex flex-col gap-2 justify-between w-full">
+                            <div >  <strong>Описание</strong> </div>
+                            <div class="text-md" >{{ movieStore.chosenMovie.description }}</div>
+                          </div>
+                         
                             
                         </div>
                     </div>
@@ -70,4 +103,10 @@ const movieStore = useMovieStore()
             </div>
         </main>
     </div>
+    </div>
+    
 </template>
+
+<style scoped>
+
+</style>

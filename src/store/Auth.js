@@ -1,6 +1,7 @@
 import { ref } from "vue";
 import { defineStore } from "pinia"
 import axios from "axios";
+
 const apiKey = import.meta.env.VITE_API_KEY_FIREBASE
 
 
@@ -16,6 +17,18 @@ export const useAuthStore = defineStore("auth", () => {
     const error = ref(false)
     const loader = ref(false)
 
+
+    const logout = () => {
+        userInfo.value = {
+            token: "",
+            userId: "",
+            email: "",
+            refreshToken: "",
+            expiresIn: ""
+        }
+        localStorage.removeItem("userTokens")
+    }
+
     const auth = async (payload, type) => {
 
         const stringUrl = type === "signup" ? "signUp" : "signInWithPassword"
@@ -28,7 +41,7 @@ export const useAuthStore = defineStore("auth", () => {
                 ...payload,
                 returnSecureToken: true
             })
-            console.log('response', response);
+
             userInfo.value = {
                 token: response.data.idToken,
                 userId: response.data.localId,
@@ -36,6 +49,11 @@ export const useAuthStore = defineStore("auth", () => {
                 refreshToken: response.data.refreshToken,
                 expiresIn: response.data.expiresIn
             }
+            localStorage.setItem("userTokens", JSON.stringify({
+                token: userInfo.value.token, refreshToken: userInfo.value.refreshToken,
+                expiresIn: userInfo.value.expiresIn
+
+            }))
         } catch (err) {
             console.log('error', err.response.data.error.message);
             switch (err.response.data.error.message) {
@@ -62,5 +80,5 @@ export const useAuthStore = defineStore("auth", () => {
         }
     }
 
-    return { auth, userInfo, error, loader }
+    return { auth, userInfo, error, loader, logout }
 })
