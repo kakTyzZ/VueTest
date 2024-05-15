@@ -2,11 +2,11 @@ import { defineStore } from "pinia";
 import { ref } from "vue"
 import { KinopoiskDev, MovieQueryBuilder } from '@openmoviedb/kinopoiskdev_client';
 import axios from 'axios'
-
+const apiKey = import.meta.env.VITE_API_KEY_KP
 import { collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db } from "../firebase.js";
 
-const kp = new KinopoiskDev("J3J2BGT-X5547DB-G9Q9AKF-4V254HZ");
+const kp = new KinopoiskDev(apiKey);
 
 /* const favouriteMovies = ref([]) */
 /* const collectionRef = collection(db, "favourites") */
@@ -58,7 +58,6 @@ queryOnSnapshot() */
 } */
 
 export const useMovieStore = defineStore("movieStore", () => {
-    const apiKey = 'J3J2BGT-X5547DB-G9Q9AKF-4V254HZ'
 
     const chosenMovie = ref("")
     const navBarInputState = ref("")

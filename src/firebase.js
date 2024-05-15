@@ -4,8 +4,12 @@ import { getFirestore } from "firebase/firestore";
 
 
 
+const Key = import.meta.env.VITE_API_KEY_FIREBASE
+
+
+
 const firebaseConfig = {
-    apiKey: "AIzaSyCj9zkUxpvA7cfcUCrI0S4IlRnexrfmTIg",
+    apiKey: Key,
     authDomain: "vue-desk-8f81a.firebaseapp.com",
     projectId: "vue-desk-8f81a",
     storageBucket: "vue-desk-8f81a.appspot.com",
